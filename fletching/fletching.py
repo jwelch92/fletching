@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
+# https://github.com/HappenApps/Quiver/wiki/Quiver-Data-Format
 import json
 from pathlib import Path
 from pprint import pprint as pp
