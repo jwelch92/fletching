@@ -64,10 +64,10 @@ class Fletching(object):
     EXCLUDED = ["Trash.qvnotebook"]
     def __init__(self, path):
         self.path = path
-        self.library = self.load_library_from_path(self.path)
+        self.library = self._load_library_from_path(self.path)
 
 
-    def load_library_from_path(self, path):
+    def _load_library_from_path(self, path):
         ret = {"path": path}
         notebooks = []
         for dir in os.listdir(path):
@@ -78,7 +78,7 @@ class Fletching(object):
             cur_notebook = {}
 
             cur_notebook["path"] = join(path, dir)
-            cur_notebook["notes"] = self.load_notes_from_path(join(cur_notebook["path"]))
+            cur_notebook["notes"] = self._load_notes_from_path(join(cur_notebook["path"]))
             if os.path.exists(join(cur_notebook["path"], "meta.json")):
                 with open(join(cur_notebook["path"], "meta.json")) as f:
                     cur_notebook.update(json.loads(f.read()))
@@ -86,7 +86,7 @@ class Fletching(object):
         ret["notebooks"] = notebooks
         return ret
 
-    def load_notes_from_path(self, path):
+    def _load_notes_from_path(self, path):
         notes = []
         # print(path)
         for f in os.listdir(path):
@@ -104,13 +104,59 @@ class Fletching(object):
         # print(notes)
         return notes
 
+    @property
+    def notebooks(self):
+        return self.library["notebooks"]
 
+    @property
+    def notes(self):
+        ret = []
+        for n in self.library["notebooks"]:
+            ret.extend(n["notes"])
+        return ret
 
+    def get_notebook_by_title(self, title):
+        for n in self.notebooks:
+            if n["title"] == title:
+                return n
+        return None
+
+    def get_notebook_by_uuid(self, uuid):
+        for n in self.notebooks:
+            if n["uuid"] == uuid:
+                return n
+        return None
+
+    def get_note_by_title(self, title):
+        for n in self.notes:
+            if n["title"] == title:
+                return n
+        return None
+
+    def get_note_by_uuid(self, uuid):
+        for n in self.notes:
+            if n["uuid"] == uuid:
+                return n
+        return None
+
+    def get_cells_for_note_by_title(self, title):
+        note = self.get_note_by_title(title)
+        return note["cells"]
+
+    def get_cells_for_note_by_uuid(self, uuid):
+        note = self.get_note_by_uuid(uuid)
+        return note["cells"]
+
+    
 
 x = Fletching("/Users/jwelch/Quiver.qvlibrary")
-pp(x.library)
+# pp(x.library)
+# print(x.notebooks)
+# pp(x.notes)
 
 
+
+print(x.get_notebook_by_uuid("3939F9BF-EC32-438C-A771-DE183F8374F5"))
 
 l = {
     "path": "path",
