@@ -6,94 +6,52 @@ import json
 import os
 import os.path
 from os.path import join
-from pathlib import Path
+
 from pprint import pprint as pp
-
-import sys
-
-# fletchmod = sys.modules[__name__]
-#
-#
-# def load_from_path(path, ext, obj):
-#     ret = {}
-#     lib_dir = Path(path)
-#     data = [x for x in lib_dir.iterdir() if x.is_dir() and x.suffix == ext]
-#     for d in data:
-#         try:
-#             ret[d.stem] = getattr(fletchmod, obj)(d)
-#         except Exception as e:
-#             print(e.args)
-#     return ret
-#
-#
-# def load_json(self, filename):
-#     with open(filename.as_posix()) as f:
-#         meta_data = json.loads(f.read())
-#     return meta_data
-#
-#
-# class Library(object):
-#     def __init__(self, path):
-#         self.path = path
-#         self.ext = ".qvnotebook"
-#         self.library = load_from_path(self.path, self.ext, "NoteBook")
-#
-#
-# class NoteBook(object):
-#     def __init__(self, path):
-#         self.ext = ".qvnote"
-#         self.path = path
-#         self.notes = load_from_path(self.path, self.ext, "Note")
-#
-#
-# class Note(object):
-#     def __init__(self, path):
-#         self.path = path
-#
-#
-# n = x.library
-# for k, v in n.items():
-#     print(k)
-#     print(v)
-# for k, v in x.library.items():
-#     print(k)
-#     print(v.notes)
 
 
 class Fletching(object):
     EXCLUDED = ["Trash.qvnotebook"]
+
     def __init__(self, path):
         self.path = path
         self.library = self._load_library_from_path(self.path)
 
-
     def _load_library_from_path(self, path):
         ret = {"path": path}
         notebooks = []
-        for dir in os.listdir(path):
-            if not os.path.isdir(join(path, dir)):
+        notebook_paths = [n for n in os.listdir(path) if self.is_qvnotebook(path, n)]
+        for ndir in notebook_paths:
+            if ndir in Fletching.EXCLUDED:
                 continue
-            if dir in Fletching.EXCLUDED:
-                continue
-            cur_notebook = {}
-
-            cur_notebook["path"] = join(path, dir)
+            cur_notebook = {"path": join(path, ndir)}
             cur_notebook["notes"] = self._load_notes_from_path(join(cur_notebook["path"]))
             if os.path.exists(join(cur_notebook["path"], "meta.json")):
                 with open(join(cur_notebook["path"], "meta.json")) as f:
-                    cur_notebook.update(json.loads(f.read()))
+                    cur_notebook.update(json.load(f))
             notebooks.append(cur_notebook)
         ret["notebooks"] = notebooks
         return ret
 
+    def is_qvnotebook(self, path, dirname):
+        if not os.path.isdir(join(path, dirname)):
+            return False
+        if not dirname.split(".")[-1] == "qvnotebook":
+            return False
+        return True
+
+    def is_qvnote(self, path, dirname):
+        if not os.path.isdir(join(path, dirname)):
+            return False
+        if not dirname.split(".")[-1] == "qvnote":
+            return False
+        return True
+
     def _load_notes_from_path(self, path):
         notes = []
-        # print(path)
-        for f in os.listdir(path):
+        note_paths = [n for n in os.listdir(path) if self.is_qvnote(path, n)]
+        for f in note_paths:
             note = {}
-            if not f.endswith(".qvnote"):
-                continue
-            # print("path", f)
             content_file = join(path, f, "content.json")
             meta_file = join(path, f, "meta.json")
             with open(content_file) as c:
@@ -101,7 +59,6 @@ class Fletching(object):
             with open(meta_file) as m:
                 note.update(json.loads(m.read()))
             notes.append(note)
-        # print(notes)
         return notes
 
     @property
@@ -147,16 +104,44 @@ class Fletching(object):
         note = self.get_note_by_uuid(uuid)
         return note["cells"]
 
-    
+    def get_notes_by_tag(self, tags: list) -> list:
+        pass
+
+    def get_tags(self) -> list:
+        pass
+
+    def create_empty_notebook(self, title):
+        pass
+
+    def create_notebook(self, title, notes):
+        pass
+
+    def create_empty_note(self, title, tags=None):
+        pass
+
+    def create_note(self, title, cells, tags=None, resources=None):
+        pass
+
+    def update_note_by_uuid(self, uuid, content):
+        pass
+
+    def update_note_by_title(self, title, content):
+        pass
+
+    def make_cell(self, data, datatype, language=None, diagram_type=None):
+        pass
+
+
+
 
 x = Fletching("/Users/jwelch/Quiver.qvlibrary")
-# pp(x.library)
+pp(x.library)
 # print(x.notebooks)
 # pp(x.notes)
 
 
 
-print(x.get_notebook_by_uuid("3939F9BF-EC32-438C-A771-DE183F8374F5"))
+# print(x.get_notebook_by_uuid("3939F9BF-EC32-438C-A771-DE183F8374F5"))
 
 l = {
     "path": "path",
